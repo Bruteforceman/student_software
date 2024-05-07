@@ -125,13 +125,21 @@ Note: For users who already have SSH credentials on their local MacBooks, OrbSta
     ./install.sh
     ```
 
-3.  (Optional) Configure git to use your favorite editor. For example, to use vim:
+3.  After running the installation script, you will need to register your telerun credentials - run:
+
+    ```
+    authorize-telerun
+    ```
+
+    Enter your kerb as the username. To obtain your token, visit this [site](https://carlguo.scripts.mit.edu:444/serve_tokens.pl) and authenticate with your MIT certificate.
+    
+4.  (Optional) Configure git to use your favorite editor. For example, to use vim:
 
     ```
     git config --global core.editor vim
     ```
 
-4.  Close your terminals and open a new one for some setup to be effective.
+5.  Close your terminals and open a new one for some setup to be effective.
 
 ## Part 3: Using the Software
 
@@ -155,12 +163,12 @@ Clang is the C compiler that we will use in this class. We provide a custom vers
 clang-6106
 ```
 
-### awsrun
+### telerun
 
-awsrun is the program you will use to submit jobs to the class AWS instances for reliable performance benchmarking. You will learn more about his during your first homework. You can use it by running:
+telerun is the program you will use to submit jobs to the class instances for reliable performance benchmarking. You will learn more about his during your first homework. You can use it by running:
 
 ```
-awsrun [binary]
+telerun [binary]
 ```
 
 ## Part 4: Test
@@ -185,7 +193,7 @@ awsrun [binary]
    cd ~/student_software
    make
    ./test_program
-   awsrun ./test_program
+   telerun ./test_program
    ```
 
    If everything worked correctly, you should see the following output.
@@ -203,7 +211,7 @@ awsrun [binary]
    Welcome to 6.106!
 
 
-   user@vm:~/student_software$ awsrun ./test_program
+   user@vm:~/student_software$ telerun ./test_program
 
    Submitting Job: ./test_program
    Waiting for job to finish...
