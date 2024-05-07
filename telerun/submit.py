@@ -84,13 +84,12 @@ def submit_job(username, token, script_args, ssl_ctx, override_pending=False):
     url_query = urllib.parse.urlencode(query_params)
     url = "https://" + server_ip_port + "/api/submit?" + url_query
     
-    if script_args["file"] is not None:
+    if "file" in script_args:
         with open(script_args["file"], 'rb') as file:
             file_content = file.read()
             base64_encoded = base64.b64encode(file_content).decode("utf-8")
-            req_json = json.dumps({'command': script_args['command'], 'file': base64_encoded}).encode("utf-8")
-    else: 
-        req_json = json.dumps({'command': script_args['command']}).encode("utf-8")
+            script_args["file"] = base64_encoded
+    req_json = json.dumps(script_args).encode("utf-8")
     request = urllib.request.Request(url, data=req_json, method="POST")
     request.add_header("Content-Type", "application/json")
     
@@ -107,16 +106,21 @@ def submit_job(username, token, script_args, ssl_ctx, override_pending=False):
     
 def parse_args(args):
     remaining_args = []
-    skip_next = False
+    skip_next_auth = False
+    skip_next_cores = False
     for arg in args.script_args:
         # check if arg is a valid file path
         if os.path.isfile(arg):
             args.file = arg
             remaining_args.append('file_placeholder')
         elif arg == '--auth':
-            skip_next = True
-        elif skip_next:
+            skip_next_auth = True
+        elif arg == '--cores':
+            skip_next_cores = True
+        elif skip_next_auth:
             args.auth = arg
+        elif skip_next_cores:
+            args.cores = int(arg)
         elif arg.startswith('--override-pending'):
             args.override_pending = True
         else:
@@ -124,8 +128,10 @@ def parse_args(args):
     
     script_args = {
         "command": ' '.join(remaining_args), 
-        "file": args.file if hasattr(args, 'file') else None
+        "cores": args.cores
     }
+    if hasattr(args, 'file'):
+        script_args["file"] = args.file
     return script_args
 
 def main():
@@ -134,6 +140,12 @@ def main():
         "--auth",
         help="Authentication token (defaults to ./auth.json in the same directory as this script)",
         default=None
+    )
+    parser.add_argument(
+        "--cores", 
+        type=int,
+        help="Number of cores to request",
+        default=1
     )
     parser.add_argument("--override-pending", action="store_true", help="Allow overriding pending jobs")
     # parser.add_argument("file", help="CUDA source file to submit")
