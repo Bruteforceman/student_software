@@ -10,36 +10,41 @@ The following section will guide you in setting up a local VM for running all co
 
 For Macbooks, we recommend creating and running an Ubuntu machine with [OrbStack](https://orbstack.dev/).
 
-1. Download OrbStack by running the following command.
+1. Download OrbStack by downloading from the site above or by running the following command.
 
    ```
    brew install orbstack
    ```
 
-   You may have to install [brew](https://brew.sh/) if it does not exist on your machine.
-
-2. Create a VM for the class named `6106` as follows:
+2. Create a Linux VM for the class by opening named `6106` as follows:
 
    ```
    orb create -a amd64 ubuntu:mantic 6106
    ```
 
-   It is important for much of the course software that your VM is AMD-based as opposed to ARM-based.
+   You can also create VMs through the OrbStack desktop app.
 
-3. SSH into your VM by running:
+   We require for this class that you run an AMD VM, **not** an ARM VM.
+
+4. SSH into your VM by running:
 
    ```
    ssh orb
    ```
 
-4. Install Git:
+5. Within the Linux terminal, install `git`:
 
    ```
    sudo apt-get update
    sudo apt-get install git
    ```
 
-You should find that the root directory of your macOS is mapped to `/mnt/mac` in the OrbStack VM. Visit this [link](https://docs.orbstack.dev/machines/file-sharing) for more details.
+OrbStack supports file sharing between Linux and macOS, so you may choose to develop entirely within your macOS directories
+if you find it convenient. Visit this [link](https://docs.orbstack.dev/machines/file-sharing) for more details.
+
+You may also set up a remote VSCode connection from your Mac by downloading the
+[Remote - SSH](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh)
+extension and connecting to host `orb`.
 
 ### Windows
 
@@ -72,15 +77,29 @@ The `C:` directory of your Windows machine is mapped to `/mnt/c/`.
 
 If you are working on a Linux machine, most of the course software should be natively compatible.
 
-Do note however that the course infrastructure is designed for Ubuntu 23.10. You may run into less issues, therefore, by developing on a VM with tools such as KVM or VMWare.
+Do note however that the course infrastructure was designed and tested for a clean install of Ubuntu 23.10.
+You may run into less issues by developing on a VM with tools such as KVM or VMWare.
 
 ## Part 2: Configure Your 6.106 VM
 
-Within your Ubuntu machine,
+Within your Linux machine,
 
 ### Configure GitHub credentials
 
-1.  Create an SSH key
+1.  Check if an SSH key exists by running the following command.
+
+    ```
+    ls -al ~/.ssh
+    ```
+
+    If you find that `~/.ssh` does not exist or that no key (`id_ed25519.pub`) exists, continue to step 2.
+    Otherwise, skip to step 3.
+
+    **Note**: For users who already have SSH credentials on their local computers, OrbStack forwards your SSH-Agent to the VM.
+    In this case there is no need to create a new SSH key as it should already exist at `~/.ssh` within the VM.
+    Furthermore, if your local SSH key is already registered on GitHub, there is no need to add it a second time.
+   
+2.  Create an SSH key
 
     ```
     ssh-keygen -t ed25519 -C "your_email@example.com"
@@ -88,15 +107,15 @@ Within your Ubuntu machine,
 
     Press **Enter** to accept the default file location, and enter a passphrase when prompted (or leave it empty).
 
-2.  Copy the pub key
+3.  Copy the pub key
 
     ```
     pbcopy < ~/.ssh/id_ed25519.pub
     ```
 
-3.  Navigate to `Settings > SSH and GPG keys` on GitHub and click `New SSH Key`. Paste the pub key into the `Key` field and `Add SSH Key`.
+4.  Navigate to `Settings > SSH and GPG keys` on GitHub and click `New SSH Key`. Paste the pub key into the `Key` field and `Add SSH Key`.
 
-4.  Verify your SSH connection
+5.  Verify your SSH connection
 
     ```
     ssh -T git@github.com
@@ -107,8 +126,6 @@ Within your Ubuntu machine,
     ```
     Hi <user>! You've successfully authenticated, but GitHub does not provide shell access.
     ```
-
-Note: For users who already have SSH credentials on their local MacBooks, OrbStack forwards your SSH agent to the VM. In this case there is no need to create a new SSH key - it should already exist at the standard directory within the VM. Furthermore, if your local SSH key is already registered on GitHub, there is no need to add it a second time.
 
 ### Install the 6.106 software
 
@@ -143,18 +160,6 @@ Note: For users who already have SSH credentials on their local MacBooks, OrbSta
 
 ## Part 3: Using the Software
 
-<!-- ### VSCode:
-
-Visual Studio Code is the development environment we recommend using. It has many builtin features that are useful for big projects development. The setup script your ran before should have installed the newest version for you!
-
-You won't be able to access VS Code through the GUI or by typing "code" into the command line. This is due to some features not being available on AFS.
-
-You can alternatively run it from the terminal using:
-
-      run-vscode-6106
-
-This will launch vscode and you should be able to pass parameters to it, like you would normally use `code`. -->
-
 ### Clang
 
 Clang is the C compiler that we will use in this class. We provide a custom version of clang that is built with OpenCilk. If you want to compile some file through the command line or while writing Makefiles, you will want to use:
@@ -173,19 +178,9 @@ telerun [binary]
 
 ## Part 4: Test
 
-<!-- 1. **Open the `student_software` folder in VS code**
-    It will prompt you whether to install the recommended extensions. Install them.
-    If you miss the prompt:
-    1. Press Ctrl-Shift-P
-    2. Type `Extensions: Install Extensions` and select that option
-    3. Look to the Recommended tab of the Extensions menu
-    4. Click Install on each of the recommended extensions.
-
-**If the extensions fail to install, restart VS Code and try installing them again.** -->
-
 ### Build the student_software test program
 
-1. Start a new terminal in your VM or inside the `student_software` VS Code window, click on Terminal, then Select New Terminal
+1. Start a new terminal in your VM or through a remote VSCode window.
 
 2. Inside the Terminal, run (You can ignore warnings/messages printed by the LLVM Gold plugin during compilation):
 
