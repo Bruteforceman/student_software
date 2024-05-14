@@ -84,11 +84,12 @@ def submit_job(username, token, script_args, ssl_ctx, override_pending=False):
     url_query = urllib.parse.urlencode(query_params)
     url = "https://" + server_ip_port + "/api/submit?" + url_query
     
-    if "file" in script_args:
-        with open(script_args["file"], 'rb') as file:
-            file_content = file.read()
-            base64_encoded = base64.b64encode(file_content).decode("utf-8")
-            script_args["file"] = base64_encoded
+    if "files" in script_args:
+        for idx, file in enumerate(script_args["files"]):
+            with open(file, 'rb') as f:
+                file_content = f.read()
+                base64_encoded = base64.b64encode(file_content).decode("utf-8")
+                script_args[f"file{idx}"] = base64_encoded
     req_json = json.dumps(script_args).encode("utf-8")
     request = urllib.request.Request(url, data=req_json, method="POST")
     request.add_header("Content-Type", "application/json")
@@ -108,11 +109,13 @@ def parse_args(args):
     remaining_args = []
     skip_next_auth = False
     skip_next_cores = False
+    
+    files = []
     for arg in args.script_args:
         # check if arg is a valid file path
         if os.path.isfile(arg):
-            args.file = arg
-            remaining_args.append('file_placeholder')
+            remaining_args.append(f"file{len(files)}")
+            files.append(arg)
         elif arg == '--auth':
             skip_next_auth = True
         elif arg == '--cores':
@@ -125,13 +128,11 @@ def parse_args(args):
             args.override_pending = True
         else:
             remaining_args.append(arg)
-    
     script_args = {
-        "command": ' '.join(remaining_args), 
-        "cores": args.cores
+        "command": " ".join(remaining_args),
+        "cores": args.cores,
+        "files": files
     }
-    if hasattr(args, 'file'):
-        script_args["file"] = args.file
     return script_args
 
 def main():
@@ -151,9 +152,12 @@ def main():
     # parser.add_argument("file", help="CUDA source file to submit")
     parser.add_argument('script_args', nargs=argparse.REMAINDER, help='Arguments for the script')
     args = parser.parse_args()
+    if len(args.script_args) == 0:
+        print("Please provide a script to run.")
+        exit(1)
     script_args = parse_args(args)
-    
-    token_path = "/usr/local/.telerun/auth.json"
+    print(script_args)
+    token_path = f"{os.path.expanduser('~')}/.telerun/auth.json"
     if not os.path.isfile(token_path):
         if args.auth is None:
             print("Please provide an authentication token.")
@@ -162,8 +166,8 @@ def main():
             print("Invalid authentication token.")
             exit(1)
         if not os.path.exists(os.path.dirname(token_path)):
-            os.system("sudo mkdir -p " + os.path.dirname(token_path))   
-        os.system(f"sudo cp {args.auth} {token_path}")
+            os.system("mkdir -p " + os.path.dirname(token_path))   
+        os.system(f"cp {args.auth} {token_path}")
         print("Authentication token copied to", token_path)
                 
     with open(token_path, "r") as f:
@@ -171,7 +175,6 @@ def main():
     username = auth["username"]
     token = auth["token"]
 
-    # source = args.file
     ssl_ctx = ssl.create_default_context(cadata=server_cert)
     
     last_complete_job = get_last_complete_job(username, token, ssl_ctx)
