@@ -53,7 +53,7 @@ server_ip_port = "6106-telerun.csail.mit.edu:4443"
 
 poll_interval = 0.25 # seconds
 
-def print_response(response):
+def process_response(response):
     result = json.loads(response["result"])["result_json"]
     if result["success"]:
         print("Job completed successfully.")
@@ -63,6 +63,12 @@ def print_response(response):
     print("--- Execution log:")
     print()
     print(result["execute_log"])
+    
+    if 'perf_data' in result:
+        print()
+        print("Perf data saved.")
+        with open("perf.data", "wb") as f:
+            f.write(base64.b64decode(result["perf_data"]))
     
     
 def get_last_complete_job(username, token, ssl_ctx):
@@ -74,7 +80,7 @@ def get_last_complete_job(username, token, ssl_ctx):
         response = json.load(f)
         if response["success"]:
             print("Last completed job:")
-            print_response(response)
+            process_response(response)
             
 
 def submit_job(username, token, script_args, ssl_ctx, override_pending=False):
@@ -109,13 +115,17 @@ def parse_args(args):
     remaining_args = []
     skip_next_auth = False
     skip_next_cores = False
-    
     files = []
-    for arg in args.script_args:
+    do_perf = False
+    for idx, arg in enumerate(args.script_args):
+        if idx == 0 and arg.startswith("perf"):
+            do_perf = True
+            
         # check if arg is a valid file path
         if os.path.isfile(arg):
             remaining_args.append(f"file{len(files)}")
             files.append(arg)
+        # TODO: dont reinvent the wheel 
         elif arg == '--auth':
             skip_next_auth = True
         elif arg == '--cores':
@@ -131,7 +141,8 @@ def parse_args(args):
     script_args = {
         "command": " ".join(remaining_args),
         "cores": args.cores,
-        "files": files
+        "files": files,
+        "perf": do_perf
     }
     return script_args
 
@@ -214,7 +225,7 @@ def main():
                 continue
             elif state == "complete":
                 # TODO: Don't double-nest JSON!
-                print_response(response)
+                process_response(response) 
                 
                 req = urllib.request.Request(
                     "https://" + server_ip_port + "/api/reported?" + url_query,
@@ -223,6 +234,7 @@ def main():
                 with urllib.request.urlopen(req, context=ssl_ctx) as f:
                     response = json.load(f)
                     print("Reported job completion.")
+                    
                 break
         except KeyboardInterrupt as e: 
             print("Keyboard Interrupted.")
