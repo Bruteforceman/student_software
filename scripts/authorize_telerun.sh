@@ -19,6 +19,6 @@ else
    fi
 
    echo $'\nSaving credentials'
-   mkdir -p /usr/local/.telerun
-   echo $'{\n\t"username": "'$USERNAME$'",\n\t"token": "'$TOKEN$'"\n}' > /usr/local/.telerun/auth.json
+   mkdir -p ~/.telerun
+   echo $'{\n\t"username": "'$USERNAME$'",\n\t"token": "'$TOKEN$'"\n}' > ~/.telerun/auth.json
 fi
