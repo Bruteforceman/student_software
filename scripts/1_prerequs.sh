@@ -29,6 +29,7 @@ else
       gnome-settings-daemon \
       metacity \
       nautilus \
+      network-manager \
       gnome-terminal \
       gdb \
       openssh-server
