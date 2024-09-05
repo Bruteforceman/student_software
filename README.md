@@ -156,7 +156,7 @@ Within your Linux machine,
     authorize-telerun
     ```
 
-    Enter your kerb as the username. To obtain your token, visit this [site](https://carlguo.scripts.mit.edu:444/serve_tokens.pl) and authenticate with your MIT certificate.
+    Enter your kerb as the username. To obtain your token, visit this [site](https://6.172.scripts.mit.edu:444/serve_tokens.pl) and authenticate with your MIT certificate. If you don't have an MIT certificate or have not renewed your certificate since last school year, please generate one using [CertAid](https://ist.mit.edu/mit-apps/certaid) and reboot your computer. If the browser prompts you that the site is unsafe, just bypass the safety warning. 
     
 5.  (Optional) Configure git to use your favorite editor. For example, to use vim:
 
