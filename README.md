@@ -53,14 +53,14 @@ For Windows computers, we recommend running an Ubuntu distribution through Windo
 1. Download WSL by running the following command:
 
    ```
-   wsl --install --distribution Ubuntu
+   wsl --install --distribution Ubuntu-24.04
    ```
 
    If you have previously installed WSL, run the following command to update your VM to what we will be using in this class:
 
    ```
    wsl --set-default-version 2
-   wsl --set-default Ubuntu-20.04
+   wsl --set-default Ubuntu-24.04
    ```
 
 2. After installing, create a username and password as prompted.
@@ -75,10 +75,15 @@ The `C:` directory of your Windows machine is mapped to `/mnt/c/`.
 
 ### Linux
 
-If you are working on a Linux machine, most of the course software should be natively compatible.
+If you are working on a Linux machine, most of the course software should be natively compatible. However, the
+setup scripts use the `apt` package manager to install packages, so if you are not using this package manager,
+it would likely be easiest to do this setup in a virtual machine, e.g. setting up a Docker container. Some tools
+used by this class also require a rather recent GLIBC version (2.32). If your GLIBC is not up to date, you should
+also consider using a Docker container. For an example of how to set up a development environment in a Docker
+container, see <https://code.visualstudio.com/docs/devcontainers/containers>.
 
-Do note however that the course infrastructure was designed and tested for a clean install of Ubuntu 23.10.
-You may run into less issues by developing on a VM with tools such as KVM or VMWare.
+<!-- Do note however that the course infrastructure was designed and tested for a clean install of Ubuntu 23.10.
+You may run into less issues by developing on a VM with tools such as KVM or VMWare. -->
 
 ## Part 2: Configure Your 6.106 VM
 
@@ -107,10 +112,10 @@ Within your Linux machine,
 
     Press **Enter** to accept the default file location, and enter a passphrase when prompted (or leave it empty).
 
-3.  Copy the pub key
+3.  Copy the pub key from the terminal
 
     ```
-    pbcopy < ~/.ssh/id_ed25519.pub
+    cat ~/.ssh/id_ed25519.pub
     ```
 
 4.  Navigate to `Settings > SSH and GPG keys` on GitHub and click `New SSH Key`. Paste the pub key into the `Key` field and `Add SSH Key`.
@@ -142,7 +147,10 @@ Within your Linux machine,
     ./install.sh
     ```
 
-3.  After running the installation script, you will need to register your telerun credentials - run:
+    **Warning:** the installation will take quite a while (around 40 minutes in testing) and may
+    occasionally require you to enter your password.
+
+4.  After running the installation script, you will need to register your telerun credentials - run:
 
     ```
     authorize-telerun
@@ -150,13 +158,13 @@ Within your Linux machine,
 
     Enter your kerb as the username. To obtain your token, visit this [site](https://carlguo.scripts.mit.edu:444/serve_tokens.pl) and authenticate with your MIT certificate.
     
-4.  (Optional) Configure git to use your favorite editor. For example, to use vim:
+5.  (Optional) Configure git to use your favorite editor. For example, to use vim:
 
     ```
     git config --global core.editor vim
     ```
 
-5.  Close your terminals and open a new one for some setup to be effective.
+6.  Close your terminals and open a new one for some setup to be effective.
 
 ## Part 3: Using the Software
 
